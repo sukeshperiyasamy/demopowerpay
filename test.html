@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Signup and Login</title>
+  </head>
+  <body>
+    <h1>Login</h1>
+    <form action="/login" method="POST">
+      <label for="email">Email:</label>
+      <input type="email" id="email" name="email" required><br><br>
+      <label for="password">Password:</label>
+      <input type="password" id="password" name="password" required><br><br>
+      <button type="submit">Login</button>
+    </form>
+    <h1>Signup</h1>
+    <form action="/signup" method="POST">
+      <label for="email">Email:</label>
+      <input type="email" id="email" name="email" required><br><br>
+      <label for="password">Password:</label>
+      <input type="password" id="password" name="password" required><br><br>
+      <label for="confirm-password">Confirm Password:</label>
+      <input type="password" id="confirm-password" name="confirm-password" required><br><br>
+      <button type="submit">Signup</button>
+    </form>
+    
+  </body>
+</html>
