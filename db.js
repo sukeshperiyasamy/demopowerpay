@@ -3,11 +3,13 @@ const bodyParser = require('body-parser');
 const mongoose = require('mongoose');
 const bcrypt = require('bcrypt');
 
+
+
 const app = express();
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
 
-mongoose.connect('mongodb://localhost:27017/mydatabase', { useNewUrlParser: true, useUnifiedTopology: true })
+mongoose.connect('mongodb://127.0.0.1:27017/mydatabase', { useNewUrlParser: true, useUnifiedTopology: true })
   .then(() => {
     console.log('Connected to database!');
   })
@@ -16,6 +18,25 @@ mongoose.connect('mongodb://localhost:27017/mydatabase', { useNewUrlParser: true
   });
 
 const User = require('./models/user'); // define user model
+app.use(express.static(__dirname));
+
+app.get('/', (req, res) => {
+  res.sendFile(__dirname + '/index.html');
+});
+
+app.get('/dashboard', (req, res) => {
+  res.sendFile(__dirname + '/dashboard.html');
+});
+// Serve the login page
+app.get('/login', (req, res) => {
+  res.sendFile(__dirname + '/index.html');
+});
+// Serve the signup page
+app.get('/signup', (req, res) => {
+  res.sendFile(__dirname + '/index.html');
+});
+
+// ...
 
 // Signup route
 app.post('/signup', (req, res, next) => {
@@ -23,9 +44,10 @@ app.post('/signup', (req, res, next) => {
   User.findOne({ email: req.body.email })
     .then(user => {
       if (user) {
-        return res.status(409).json({
-          message: 'Email already exists'
-        });
+        return res.send(`
+          <h2>Email already exists</h2>
+          <a href="/">Go back</a>
+        `);
       }
       // Hash the password
       bcrypt.hash(req.body.password, 10)
@@ -37,24 +59,20 @@ app.post('/signup', (req, res, next) => {
           // Save user to database
           user.save()
             .then(result => {
-              console.log(result);
-              res.status(201).json({
-                message: 'User created',
-                user: {
-                  email: result.email,
-                  password: result.password
-                }
-              });
+              // Redirect to dashboard.html
+              res.redirect('/dashboard');
             })
             .catch(err => {
               console.log(err);
-              res.status(500).json({
-                error: err
-              });
+              res.send(`
+                <h2>An error occurred</h2>
+                <a href="/">Go back</a>
+              `);
             });
         });
     });
 });
+// ...
 
 // Login route
 app.post('/login', (req, res, next) => {
@@ -62,35 +80,44 @@ app.post('/login', (req, res, next) => {
   User.findOne({ email: req.body.email })
     .then(user => {
       if (!user) {
-        return res.status(401).json({
-          message: 'Authentication failed'
-        });
+        return res.send(`
+          <h2>Authentication failed</h2>
+          <a href="/">Go back</a>
+        `);
       }
       // Compare password hashes
       bcrypt.compare(req.body.password, user.password, (err, result) => {
         if (err) {
-          return res.status(401).json({
-            message: 'Authentication failed'
-          });
+          return res.send(`
+            <h2>Authentication failed</h2>
+            <a href="/">Go back</a>
+          `);
         }
         if (result) {
-          return res.status(200).json({
-            message: 'Authentication successful'
-          });
+          // Redirect to dashboard.html
+          res.redirect('/dashboard.html');
+        } else {
+          res.send(`
+            <h2>Authentication failed</h2>
+            <a href="/">Go back</a>
+          `);
         }
-        return res.status(401).json({
-          message: 'Authentication failed'
-        });
       });
     })
     .catch(err => {
       console.log(err);
-      res.status(500).json({
-        error: err
-      });
+      res.send(`
+        <h2>An error occurred</h2>
+        <a href="/">Go back</a>
+      `);
     });
 });
 
-app.listen(3000, () => {
-  console.log('Server listening on port 3000');
+// ...
+
+// Serve static files from the "public" directory
+
+
+app.listen(4000, () => {
+  console.log('Server listening on port 4000');
 });
